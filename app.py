@@ -16,7 +16,8 @@ db_config = {
     "host": os.environ.get("DB_HOST", "localhost"),
     "user": os.environ.get("DB_USER", "root"),
     "password": os.environ.get("DB_PASSWORD", "tiger"),
-    "database": os.environ.get("DB_NAME", "care_bridge")
+    "database": os.environ.get("DB_NAME", "care_bridge"),
+    "port": int(os.environ.get("DB_PORT", 3306))
 }
 
 def get_db_connection():
