@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Find Nearest Hospital | Health Connect</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0d6efd;
+            --danger: #dc3545;
+            --success: #198754;
+            --bg: #f4f6f9;
+            --card: #ffffff;
+        }
+
+        * { box-sizing: border-box; font-family: "Segoe UI", sans-serif; }
+        body { margin: 0; background: var(--bg); }
+
+        header { background: var(--primary); color: white; padding: 15px; text-align: center; }
+
+        /* SEARCH PANEL */
+        .search-panel {
+            background: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 10px;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .search-row input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 6px; }
+        .btn-search { background: var(--primary); color: white; border: none; padding: 0 25px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+
+        /* FILTERS */
+        .filter-section {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .filter-group { display: flex; gap: 8px; align-items: center; background: #fff; padding: 5px 15px; border-radius: 30px; border: 1px solid #eee; }
+        .filter-group label { font-size: 13px; cursor: pointer; font-weight: 600; }
+
+        /* RESULTS */
+        .results {
+            padding: 25px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        /* HOSPITAL CARD (Red Border Style) */
+        .card {
+            background: var(--card);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border-left: 8px solid var(--danger);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .card h3 { margin: 0; font-size: 1.3rem; }
+        .badges { display: flex; gap: 5px; }
+        .badge { font-size: 11px; padding: 3px 8px; border-radius: 12px; font-weight: bold; }
+        .verified { background: #d1e7dd; color: #0f5132; }
+        .govt-badge { background: #e0f0ff; color: #0d6efd; }
+        .emergency-badge { background: #f8d7da; color: var(--danger); }
+
+        .card p { font-size: 14px; margin: 2px 0; color: #555; }
+        .card i { color: var(--danger); width: 20px; }
+
+        /* ACTIONS */
+        .actions { display: flex; gap: 10px; margin-top: 10px; }
+        .actions button, .actions a {
+            flex: 1; padding: 10px; border: none; border-radius: 6px; 
+            cursor: pointer; font-weight: bold; text-decoration: none; text-align: center;
+            font-size: 14px;
+        }
+        .btn-maps { background: #0d6efd; color: white; }
+        .btn-details { background: #f8f9fa; border: 1px solid #ddd !important; color: #333; }
+
+        /* MODAL */
+        .modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            display: none; justify-content: center; align-items: center; z-index: 1000;
+        }
+        .modal-content {
+            background: white; padding: 25px; width: 90%; max-width: 450px;
+            border-radius: 12px; position: relative;
+        }
+        .close-btn { position: absolute; top: 15px; right: 15px; font-size: 20px; cursor: pointer; color: #666; }
+        
+        .facility-list { list-style: none; padding: 0; margin: 15px 0; }
+        .facility-list li { padding: 8px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
+        .status-yes { color: var(--success); font-weight: bold; }
+        .status-no { color: var(--danger); font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h2>🏥 Nearest Hospital Finder</h2>
+</header>
+
+<div class="search-panel">
+    <div class="search-row">
+        <input type="text" id="cityInput" placeholder="📍 Search by City (e.g., Mumbai, Delhi)">
+        <button class="btn-search" onclick="fetchHospitals()">Search</button>
+    </div>
+
+    <div class="filter-section" id="allFilters">
+        <div class="filter-group">
+            <input type="checkbox" id="filterGovt" value="Government" onchange="fetchHospitals()">
+            <label for="filterGovt">Government</label>
+        </div>
+        <div class="filter-group">
+            <input type="checkbox" id="filterPrivate" value="Private" onchange="fetchHospitals()">
+            <label for="filterPrivate">Private</label>
+        </div>
+        <div class="filter-group"><input type="checkbox" value="has_icu" onchange="fetchHospitals()"><label>ICU</label></div>
+        <div class="filter-group"><input type="checkbox" value="has_blood_bank" onchange="fetchHospitals()"><label>Blood Bank</label></div>
+        <div class="filter-group"><input type="checkbox" value="has_maternity" onchange="fetchHospitals()"><label>Maternity</label></div>
+        <div class="filter-group"><input type="checkbox" value="has_dialysis" onchange="fetchHospitals()"><label>Dialysis</label></div>
+        <div class="filter-group"><input type="checkbox" value="emergency_24x7" onchange="fetchHospitals()"><label>24/7 Emergency</label></div>
+    </div>
+</div>
+
+<div class="results" id="results">
+    </div>
+
+<div class="modal" id="detailsModal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()"><i class="fas fa-times"></i></span>
+        <div id="modalBody"></div>
+    </div>
+</div>
+
+<script>
+let hospitalData = []; // Local store to show details without re-fetching
+
+async function fetchHospitals() {
+    const city = document.getElementById('cityInput').value;
+    
+    // Collect types (Govt/Private)
+    const types = [];
+    if(document.getElementById('filterGovt').checked) types.push('Government');
+    if(document.getElementById('filterPrivate').checked) types.push('Private');
+
+    // Collect facilities
+    const facilities = [];
+    document.querySelectorAll('#allFilters input[type="checkbox"]:checked').forEach(cb => {
+        if(cb.value.startsWith('has_') || cb.value === 'emergency_24x7') {
+            facilities.push(cb.value);
+        }
+    });
+
+    const response = await fetch('/api/search_hospitals', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ city, types, facilities })
+    });
+
+    hospitalData = await response.json();
+    renderCards(hospitalData);
+}
+
+function renderCards(hospitals) {
+    const resultsDiv = document.getElementById('results');
+    resultsDiv.innerHTML = hospitals.length === 0 ? '<p style="text-align:center; grid-column:1/-1;">No hospitals found.</p>' : '';
+
+    hospitals.forEach(h => {
+        const card = `
+            <div class="card">
+                <h3>${h.name}</h3>
+                <div class="badges">
+                    ${h.verified ? '<span class="badge verified">✔ Verified</span>' : ''}
+                    <span class="badge govt-badge">${h.hospital_type}</span>
+                    ${h.emergency_24x7 ? '<span class="badge emergency-badge">24×7 Emergency</span>' : ''}
+                </div>
+                <p><i class="fas fa-map-marker-alt"></i> ${h.address}, ${h.city}</p>
+                <p><i class="fas fa-phone"></i> ${h.phone || 'N/A'}</p>
+                <div class="actions">
+                    <a href="https://www.google.com/maps?q=${h.latitude},${h.longitude}" target="_blank" class="btn-maps"><i class="fas fa-location-arrow"></i> Maps</a>
+                    <button class="btn-details" onclick="openDetails(${h.hospital_id})"><i class="fas fa-info-circle"></i> View Details</button>
+                </div>
+            </div>
+        `;
+        resultsDiv.innerHTML += card;
+    });
+}
+
+function openDetails(id) {
+    const h = hospitalData.find(x => x.hospital_id === id);
+    const body = document.getElementById('modalBody');
+    
+    body.innerHTML = `
+        <h2 style="margin-bottom:5px;">${h.name}</h2>
+        <p style="color:#666; font-size:14px;">Established: ${h.year_established || 'N/A'}</p>
+        <hr>
+        <ul class="facility-list">
+            <li><span>ICU</span> <span class="${h.has_icu ? 'status-yes' : 'status-no'}">${h.has_icu ? 'Yes' : 'No'}</span></li>
+            <li><span>Blood Bank</span> <span class="${h.has_blood_bank ? 'status-yes' : 'status-no'}">${h.has_blood_bank ? 'Available' : 'No'}</span></li>
+            <li><span>NICU</span> <span class="${h.has_nicu ? 'status-yes' : 'status-no'}">${h.has_nicu ? 'Yes' : 'No'}</span></li>
+            <li><span>Dialysis</span> <span class="${h.has_dialysis ? 'status-yes' : 'status-no'}">${h.has_dialysis ? 'Yes' : 'No'}</span></li>
+            <li><span>Maternity</span> <span class="${h.has_maternity ? 'status-yes' : 'status-no'}">${h.has_maternity ? 'Yes' : 'No'}</span></li>
+        </ul>
+        <p><strong>OPD Timings:</strong> 9 AM - 5 PM</p>
+        <p><strong>Emergency:</strong> 24 Hours Available</p>
+    `;
+    document.getElementById('detailsModal').style.display = 'flex';
+}
+
+function closeModal() { document.getElementById('detailsModal').style.display = 'none'; }
+</script>
+</body>
+</html>

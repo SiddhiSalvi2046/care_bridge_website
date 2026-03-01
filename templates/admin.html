@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | MediHub Master Control</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --admin-primary: #263238; 
+            --accent: #00897B; 
+            --bg: #F4F7F9; 
+            --white: #ffffff;
+            --text-dark: #333;
+            --danger: #d32f2f;
+            --success: #388e3c;
+            --warning: #f57c00;
+            --info: #1976d2;
+        }
+
+        * { margin:0; padding:0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { display: flex; background: var(--bg); height: 100vh; overflow: hidden; }
+
+        /* Sidebar Navigation */
+        .sidebar { width: 280px; background: var(--admin-primary); color: white; display: flex; flex-direction: column; transition: all 0.3s; z-index: 100; }
+        .sidebar-header { padding: 30px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-header h2 { font-size: 1.5rem; color: var(--accent); letter-spacing: 1px; }
+        .nav-menu { flex: 1; padding: 20px 0; overflow-y: auto; }
+        .nav-item { padding: 15px 30px; display: flex; align-items: center; color: #b0bec5; text-decoration: none; transition: 0.3s; cursor: pointer; }
+        .nav-item i { margin-right: 15px; width: 20px; font-size: 1.1rem; }
+        .nav-item:hover, .nav-item.active { background: rgba(0, 137, 123, 0.1); color: var(--accent); border-left: 5px solid var(--accent); }
+
+        .logout-section { padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .logout-btn { width: 100%; padding: 12px; background: var(--danger); color: white; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 600; transition: 0.3s; }
+        .logout-btn:hover { background: #b71c1c; }
+
+        /* Main Content */
+        .main-content { flex: 1; padding: 40px; overflow-y: auto; scroll-behavior: smooth; }
+        .header-title { margin-bottom: 30px; border-left: 5px solid var(--accent); padding-left: 15px; }
+        .header-title h1 { font-size: 1.8rem; color: var(--admin-primary); }
+
+        /* Tab Visibility Control */
+        .admin-section { display: none; animation: fadeIn 0.4s ease forwards; }
+        .admin-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Stats Cards */
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .stat-box { background: var(--white); padding: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); position: relative; }
+        .stat-box p { font-size: 0.9rem; color: #888; }
+        .stat-box h3 { font-size: 1.8rem; margin: 5px 0; color: var(--text-dark); }
+        .stat-box i { font-size: 2.5rem; color: var(--accent); opacity: 0.15; position: absolute; right: 20px; bottom: 15px; }
+
+        /* Tables & Data Cards */
+        .data-card { background: var(--white); padding: 30px; border-radius: 25px; box-shadow: 0 5px 20px rgba(0,0,0,0.03); margin-top: 10px; }
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .data-table th { text-align: left; padding: 15px; background: #f9f9f9; color: #777; font-weight: 500; border-bottom: 2px solid #eee; }
+        .data-table td { padding: 15px; border-bottom: 1px solid #f1f1f1; font-size: 0.95rem; }
+
+        /* Badges & Buttons */
+        .status-badge { padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+        .badge-icu { background: #fff3e0; color: var(--warning); }
+        .badge-gov { background: #e3f2fd; color: var(--info); }
+        .badge-pvt { background: #f3e5f5; color: #7b1fa2; }
+        .badge-active { background: #e8f5e9; color: var(--success); }
+        
+        .action-btn { padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: 0.2s; }
+        .approve { background: #e8f5e9; color: var(--success); }
+        .approve:hover { background: var(--success); color: white; }
+        .reject { background: #ffebee; color: var(--danger); margin-left: 5px; }
+        .reject:hover { background: var(--danger); color: white; }
+
+        #toast-container {
+            position: fixed;
+            top: 20px;            /* Moved from bottom to top */
+            left: 50%;            /* Center horizontally */
+            transform: translateX(-50%); /* Align exactly in middle */
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;  /* Stack multiple toasts in center */
+        }
+
+        /* Update the animation to slide from top */
+        .toast {
+            background: white;
+            color: #333;
+            padding: 12px 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            margin-bottom: 10px; /* Space between multiple toasts */
+            display: flex;
+            align-items: center;
+            border-left: 5px solid var(--accent);
+            animation: slideDown 0.4s ease forwards;
+            min-width: 320px;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .toast-fadeout {
+            animation: fadeOutUp 0.4s ease forwards;
+        }
+
+        @keyframes fadeOutUp {
+            to { transform: translateY(-200%); opacity: 0; }
+        }
+        .modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5); backdrop-filter: blur(5px);
+    display: flex; justify-content: center; align-items: center; z-index: 10000;
+}
+.modal-card {
+    background: white; padding: 25px; border-radius: 20px;
+    width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+.modal-card textarea {
+    width: 100%; height: 100px; margin: 15px 0; padding: 10px;
+    border: 1px solid #ddd; border-radius: 10px; resize: none;
+}
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+.btn-cancel { background: #eee; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
+.btn-confirm { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
+.hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div id="toast-container"></div>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>MediHub</h2>
+            <small style="color: var(--accent)">Global Administration</small>
+        </div>
+        
+        <nav class="nav-menu">
+            <div class="nav-item active" onclick="showTab('overview', this)"><i class="fas fa-chart-line"></i> Overview</div>
+            <div class="nav-item" onclick="showTab('pending-hospitals', this)"><i class="fas fa-hospital-symbol"></i> Pending Hospitals</div>
+            <div class="nav-item" onclick="showTab('blood', this)"><i class="fas fa-tint"></i> Blood Donors</div>
+            <div class="nav-item" onclick="showTab('camps', this)"><i class="fas fa-campground"></i> Camp Approvals</div>
+            <div class="nav-item" onclick="showTab('donors', this)"><i class="fas fa-id-card"></i> Organ Donors</div>
+            <div class="nav-item" onclick="showTab('vaccination-approvals', this)"><i class="fas fa-syringe"></i> Vaccination Centers</div>
+            <div class="nav-item" onclick="showTab('doctor-approvals', this)"><i class="fas fa-user-md"></i> Doctor Approvals</div>
+        </nav>
+
+        <div class="logout-section">
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        
+        <div id="overview" class="admin-section active">
+            <div class="header-title">
+                <h1>Platform Dashboard</h1>
+                <p>Oversight of users, hospitals, and critical resources.</p>
+            </div>
+            <div class="stat-grid">
+                <div class="stat-box">
+                    <p>Verified Hospitals</p>
+                    <h3>42</h3>
+                    <i class="fas fa-hospital"></i>
+                </div>
+                <div class="stat-box">
+                    <p>Users</p>
+                    <h3>184</h3>
+                    <i class="fas fa-bed"></i>
+                </div>
+                <div class="stat-box">
+                    <p>Organ Donors</p>
+                    <h3>156</h3>
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <div class="stat-box">
+                    <p>Blood Units (Total)</p>
+                    <h3>2,400</h3>
+                    <i class="fas fa-tint"></i>
+                </div>
+            </div>
+        </div>
+
+        <div id="pending-hospitals" class="admin-section">
+            <div class="header-title">
+                <h1>Hospital Verifications</h1>
+                <p>Review hospital credentials and medical licenses before granting access.</p>
+            </div>
+            <div class="data-card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Hospital Name</th>
+                            <th>License ID</th>
+                            <th>City</th>
+                            <th>Type</th>
+                            <th>Email</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pendingHospitalsBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="blood" class="admin-section">
+            <div class="header-title">
+                <h1>Blood Donor Registry</h1>
+                <p>List of individuals registered to donate blood.</p>
+            </div>
+            <div class="data-card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Donor Name</th>
+                            <th>Blood Group</th>
+                            <th>City</th>
+                            <th>Phone</th>
+                            <th>Registered On</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bloodDonorsBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="camps" class="admin-section">
+            <div class="header-title">
+                <h1>Health Camp Approvals</h1>
+                <p>Approve health camps crowdsourced by the community.</p>
+            </div>
+            <div class="data-card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Camp Name</th>
+                            <th>Organizer</th>
+                            <th>Date</th>
+                            <th>Address</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="campsTableBody">
+</tbody>
+                </table>
+            </div>
+        </div>
+
+
+        <div id="donors" class="admin-section">
+            <div class="header-title">
+                <h1>Organ Donor Registry</h1>
+                <p>Verified list of pledged organ donors.</p>
+            </div>
+            <div class="data-card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Blood Group</th>
+                            <th>Pledged Organs</th>
+                            <th>Contact</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="organDonorsBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="vaccination-approvals" class="admin-section">
+            <div class="header-title">
+                <h1>Vaccination Center Approvals</h1>
+                <p>Review vaccination centers submitted by hospitals.</p>
+            </div>
+
+            <div class="data-card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Hospital Name</th>
+                            <th>Center Name</th>
+                            <th>Vaccine Types</th>
+                            <th>City</th>
+                            <th>Slots / Day</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vaccinationTableBody">
+                        <!-- dynamic -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div id="doctor-approvals" class="admin-section">
+            <div class="header-title">
+                <h1>Doctor Approvals</h1>
+                <p>Verify doctors before making them visible to users.</p>
+            </div>
+
+            <div class="data-card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Doctor Name</th>
+                            <th>Hospital</th>
+                            <th>Specialization</th>
+                            <th>Experience</th>
+                            <th>License No.</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="doctorsApprovalBody">
+                        <!-- dynamic -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- REJECTION MODAL -->
+<div id="rejectionModal" class="modal-overlay hidden">
+    <div class="modal-card">
+        <h3>Reject Hospital</h3>
+        <p>Please enter the reason for rejection:</p>
+        <textarea id="rejectionReason" placeholder="e.g., Invalid Medical License..."></textarea>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeRejectionModal()">Cancel</button>
+            <button class="btn-confirm" id="confirmRejectBtn">Send Rejection</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- GLOBAL CONFIRM MODAL -->
+<div id="confirmModal" class="modal-overlay hidden">
+    <div class="modal-card">
+        <h3>Confirm Action</h3>
+        <p id="confirmMessage">Are you sure?</p>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeConfirmModal()">Cancel</button>
+            <button class="btn-confirm" id="confirmActionBtn">Yes</button>
+        </div>
+    </div>
+</div>
+    </div>
+
+    <script>
+        /* GLOBAL CONFIRM MODAL SYSTEM */
+let confirmCallback = null;
+
+function openConfirmModal(message, callback) {
+    document.getElementById("confirmMessage").innerText = message;
+    confirmCallback = callback;
+    document.getElementById("confirmModal").classList.remove("hidden");
+}
+
+function closeConfirmModal() {
+    document.getElementById("confirmModal").classList.add("hidden");
+}
+
+document.getElementById("confirmActionBtn").onclick = function () {
+    if (confirmCallback) confirmCallback();
+    closeConfirmModal();
+};
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        if(!container) return;
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> <span style="margin-left:10px">${message}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.classList.add('toast-fadeout');
+            setTimeout(() => toast.remove(), 500);
+        }, 4000);
+    }
+
+    // 1. Tab Switching Logic
+    function showTab(tabId, element) {
+        document.querySelectorAll('.admin-section').forEach(section => {
+            section.classList.remove('active');
+        });
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        document.getElementById(tabId).classList.add('active');
+        element.classList.add('active');
+
+        // Trigger data load when 'Camps' tab is clicked
+        if (tabId === 'pending-hospitals') loadPendingHospitals();
+        if (tabId === 'camps') loadPendingCamps();
+        if (tabId === 'registrations') loadRegistrations();
+        if (tabId === 'blood') loadBloodDonors(); 
+        if (tabId === 'donors') loadOrganDonors();
+        if (tabId === 'vaccination-approvals') loadVaccinationCenters();
+        if (tabId === 'doctor-approvals') loadPendingDoctors();
+
+    }
+
+    function loadBloodDonors() {
+        fetch('/admin/get_blood_donors')
+            .then(res => res.json())
+            .then(data => {
+                if (!Array.isArray(data)) {
+                console.error("Server Error:", data);
+                return;
+                }
+
+                const tbody = document.getElementById('bloodDonorsBody');
+                tbody.innerHTML = '';
+                data.forEach(donor => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><strong>${donor.name}</strong></td>
+                            <td><span class="status-badge badge-icu">${donor.blood_group}</span></td>
+                            <td>${donor.city}</td>
+                            <td>${donor.phone}</td>
+                            <td>${new Date(donor.registered_at).toLocaleDateString()}</td>
+                        </tr>`;
+                });
+            })
+            .catch(err => console.error("Fetch Error:", err));
+    }
+
+    // New Function: Fetch Organ Donors
+    function loadOrganDonors() {
+        fetch('/admin/get_organ_donors')
+            .then(res => res.json())
+            .then(data => {
+                const tbody = document.getElementById('organDonorsBody');
+                tbody.innerHTML = '';
+                data.forEach(donor => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>#REG-${donor.id}</td>
+                            <td><strong>${donor.first_name} ${donor.last_name}</strong></td>
+                            <td>${donor.blood_group}</td>
+                            <td><small>${donor.organs_pledged}</small></td>
+                            <td>${donor.mobile_number}</td>
+                            <td>${new Date(donor.registration_date).toLocaleDateString()}</td>
+                        </tr>`;
+                });
+            });
+    }
+
+   function loadPendingHospitals() {
+    fetch('/admin/get_pending_hospitals')
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.getElementById('pendingHospitalsBody');
+            tbody.innerHTML = '';
+            data.forEach(hosp => {
+    tbody.innerHTML += `
+        <tr>
+            <td>${hosp.hospitalName}</td>
+            <td>${hosp.licenseId}</td>
+            <td>${hosp.city}</td>
+            <td>${hosp.type}</td>
+            <td>${hosp.email}</td>
+            <td>
+                <button class="action-btn approve" onclick="handleHospital(${hosp.id}, 'approve')">
+                    Approve
+                </button>
+                <button class="action-btn reject" onclick="handleHospital(${hosp.id}, 'reject')">
+                    Reject
+                </button>
+            </td>
+        </tr>`;
+});
+        });
+}
+
+let currentHospId = null; // To keep track of which hospital we are rejecting
+
+function handleHospital(id, action) {
+    if (action === 'approve') {
+        processDecision(id, 'approve', '');
+    } else {
+        // Show the custom modal instead of prompt()
+        currentHospId = id;
+        document.getElementById('rejectionModal').classList.remove('hidden');
+    }
+}
+
+function closeRejectionModal() {
+    document.getElementById('rejectionModal').classList.add('hidden');
+    document.getElementById('rejectionReason').value = '';
+}
+
+// When the admin clicks "Send Rejection" inside the custom modal
+document.getElementById('confirmRejectBtn').onclick = function() {
+    const reason = document.getElementById('rejectionReason').value;
+    if (!reason) {
+        showToast("Please provide a reason", "error");
+        return;
+    }
+    processDecision(currentHospId, 'reject', reason);
+    closeRejectionModal();
+};
+
+async function processDecision(id, action, reason) {
+    const response = await fetch(`/api/hospital_decision/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: action, reason: reason })
+    });
+    const data = await response.json();
+    
+    showToast(data.message, data.status === 'success' ? 'success' : 'error');
+    loadPendingHospitals();
+}
+    // 2. Fetch Pending Camps from Python Backend
+    function loadPendingCamps() {
+        fetch('/admin/get_pending_camps')
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('campsTableBody');
+                tbody.innerHTML = ''; // Clear existing dummy rows
+
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No pending requests found.</td></tr>';
+                    return;
+                }
+
+                data.forEach(camp => {
+                    const row = `
+                        <tr>
+                            <td><strong>${camp.camp_name}</strong></td>
+                            <td>${camp.hospital_name}</td>
+                            <td>${camp.camp_date}</td>
+                            <td>${camp.address}</td>
+                            <td>
+                                <button class="action-btn approve" onclick="process(this, 'approved', ${camp.id})">Approve</button>
+                                <button class="action-btn reject" onclick="process(this, 'rejected', ${camp.id})">Reject</button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+            })
+            .catch(err => console.error('Error loading camps:', err));
+    }
+
+    function loadRegistrations() {
+    fetch('/admin/camp_registrations') // This matches the Python route we created
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.getElementById('registrationTableBody');
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No registrations found yet.</td></tr>';
+                return;
+            }
+
+            data.forEach(reg => {
+                const row = `
+                    <tr>
+                        <td><strong>${reg.full_name}</strong></td>
+                        <td><span class="status-badge badge-gov">${reg.camp_name}</span></td>
+                        <td>${reg.phone}</td>
+                        <td>${reg.email}</td>
+                        <td><span class="status-badge badge-active">Confirmed</span></td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        });
+}
+
+    // 3. Process Approval/Rejection
+    function process(btn, action, campId) {
+    openConfirmModal(`Are you sure you want to mark this as ${action}?`, function () {
+
+        fetch(`/admin/handle_camp/${campId}`, { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: action }) 
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.status === "success") {
+                showToast("Camp " + action + " successfully!", "success");
+                btn.closest('tr').remove();
+            } else {
+                showToast(data.message, "error");
+            }
+        })
+        .catch(err => {
+            showToast("Server error. Check terminal.", "error");
+        });
+
+    });
+}
+async function loadVaccinationCenters() {
+    try {
+        const response = await fetch('/admin/get_pending_vaccination');
+        const data = await response.json();
+
+        console.log("Vaccination centers:", data);
+
+        const tbody = document.getElementById('vaccinationTableBody');
+        tbody.innerHTML = '';
+
+        if (data.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align:center;">
+                        No pending vaccination centers
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        data.forEach(v => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${v.hospital_name}</td>
+                    <td>${v.center_name}</td>
+                    <td>${v.vaccine_type}</td>
+                    <td>${v.city}</td>
+                    <td>${v.slots_available}</td>
+                    <td>
+                        <button class="action-btn approve"
+                            onclick="handleVaccine(${v.id}, 'Approved')">
+                            Approve
+                        </button>
+                        <button class="action-btn reject"
+                            onclick="handleVaccine(${v.id}, 'Rejected')">
+                            Reject
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+    } catch (err) {
+        console.error("Error loading vaccination centers:", err);
+    }
+}
+
+
+function loadPendingDoctors() {
+    fetch('/admin/get_pending_doctors')
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.getElementById('doctorsApprovalBody');
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align:center;">No pending doctor approvals.</td>
+                    </tr>`;
+                return;
+            }
+
+            data.forEach(doc => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>Dr. ${doc.name}</strong></td>
+                        <td>${doc.hospital_name}</td>
+                        <td>
+                            <span class="status-badge badge-pvt">${doc.specialization}</span>
+                        </td>
+                        <td>${doc.experience} yrs</td>
+                        <td>${doc.license_no}</td>
+                        <td>
+                            <button class="action-btn approve"
+                                onclick="handleDoctor(${doc.id}, 'approve')">
+                                Approve
+                            </button>
+                            <button class="action-btn reject"
+                                onclick="handleDoctor(${doc.id}, 'reject')">
+                                Reject
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        });
+}
+
+async function handleVaccine(id, action) {
+
+    openConfirmModal(`Are you sure you want to ${action} this center?`, async function () {
+
+        const response = await fetch(`/admin/handle_vaccine_center/${id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action })
+        });
+
+        const result = await response.json();
+        showToast(result.message, result.status === "success" ? "success" : "error");
+        loadVaccinationCenters();
+
+    });
+}
+
+function handleDoctor(id, action) {
+
+    openConfirmModal(`Are you sure you want to ${action} this doctor?`, function () {
+
+        fetch(`/api/handle_doctor/${id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: action })
+        })
+        .then(res => res.json())
+        .then(data => {
+            showToast(data.message, data.status === "success" ? "success" : "error");
+            loadPendingDoctors();
+        });
+
+    });
+}
+
+function handleCamp(id, action) {
+
+    openConfirmModal(`Are you sure you want to ${action} this camp?`, function () {
+
+        fetch(`/admin/handle_camp/${id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: action })
+        })
+        .then(res => res.json())
+        .then(data => {
+            showToast(data.message, data.status === "success" ? "success" : "error");
+            loadPendingCamps();
+        })
+        .catch(err => {
+            showToast("Action failed: " + err.message, "error");
+        });
+
+    });
+}
+    // 4. Logout Redirect
+    function logout() {
+    openConfirmModal("Confirm Logout from Admin Control?", function () {
+        window.location.href = "/";
+    });
+}
+
+    // Initial load for the overview or pending count
+    window.onload = () => {
+        // You could call a function here to update the stat-grid boxes
+    };
+</script>
+</body>
+</html>

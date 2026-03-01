@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediHub | Blood Bank</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Core Styles */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+        body { background: #f4f7f9; color: #333; padding: 20px; }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        h2 { color: #c62828; margin-bottom: 20px; font-size: 1.8rem; }
+
+        /* Tabs Styling */
+        .tabs { display: flex; border-bottom: 2px solid #eee; margin-bottom: 25px; gap: 20px; overflow-x: auto; }
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: 0.3s;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+        }
+        .tab.active { color: #c62828; border-bottom: 3px solid #c62828; }
+
+        .section { display: none; animation: fadeIn 0.4s ease; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Laptop Friendly Cards */
+        /* Container adjustment for better background contrast */
+        
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+            align-items: start; /* Keeps cards from stretching together */
+        }
+
+        .bank-card {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #d1d5db; /* Visible border */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            overflow: hidden; /* Ensures the header background stays in the corners */
+            transition: box-shadow 0.3s ease;
+        }
+
+        .bank-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Give the Hospital Name a "Header" look */
+        .bank-card h3 {
+            background: #fdf2f2; /* Very light red tint */
+            padding: 15px 20px;
+            margin: 0;
+            border-bottom: 1px solid #fee2e2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.1rem;
+            color: #991b1b;
+        }
+
+        /* Add padding back to the expansion area */
+        .blood-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 20px; /* Essential: creates space inside the card */
+        }
+
+        .blood-item {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .blood-group-label {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: #c62828;
+        }
+
+        .units-count {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        /* Forms */
+        .form-group { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        input, select { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
+        .btn-main {
+            background: #c62828; color: white; border: none; padding: 12px 25px;
+            border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%;
+        }
+        .btn-main:hover { background: #a81d1d; }
+
+        .status-high { color: #2e7d32; font-weight: bold; }
+        .status-critical { color: #c62828; font-weight: bold; }
+
+        /* Guidelines & Info Styling */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .info-card {
+            background: #fff8f8;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px dashed #c62828;
+        }
+        .info-card h3 { color: #c62828; font-size: 1.1rem; margin-bottom: 15px; }
+        .info-card ul { list-style: none; }
+        .info-card li { margin-bottom: 10px; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; }
+        .info-card li::before { content: "✔"; color: #2e7d32; font-weight: bold; }
+
+        .process-timeline {
+            background: #fdfdfd;
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid #eee;
+        }
+        .process-timeline h3 { margin-bottom: 15px; color: #333; }
+        .process-timeline .step {
+            padding: 15px;
+            border-left: 3px solid #ddd;
+            margin-left: 10px;
+            position: relative;
+            font-size: 0.95rem;
+        }
+        .process-timeline .step::before {
+            content: "";
+            position: absolute;
+            left: -8px; top: 18px;
+            width: 13px; height: 13px;
+            background: #c62828;
+            border-radius: 50%;
+        }
+        .status-badge {
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+        }
+        .high-availability { background: #e8f5e9; color: #2e7d32; }
+        .limited-availability { background: #fff3e0; color: #ef6c00; }
+        .critical { background: #ffebee; color: #c62828; }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #28a745;
+            color: white;
+            padding: 14px 22px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+            z-index: 99999;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+            animation: slideDown 0.3s ease;
+        }
+
+        .toast.error {
+            background: #dc3545;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -20px);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2><i class="fas fa-droplet"></i> Blood Bank Dashboard</h2>
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab(event, 'availability')">Live Availability</div>
+        <div class="tab" onclick="switchTab(event, 'find')">Search Blood Banks</div>
+        <div class="tab" onclick="switchTab(event, 'donor')">Become a Donor</div>
+        <div class="tab" onclick="switchTab(event, 'info')">Guidelines & Process</div>
+    </div>
+
+    <div class="section active" id="availability">
+        <div id="hospital-container" class="grid-container"></div>
+    </div>
+
+
+
+    <div class="section" id="find">
+        <div class="form-group">
+            <input type="text" id="searchCity" placeholder="Enter City (e.g., Mumbai)">
+            <select id="searchType">
+                <option value="">All Types</option>
+                <option value="Government">Government</option>
+                <option value="Private">Private</option>
+                <option value="Hospital-based">Hospital-based</option>
+            </select>
+            <button class="btn-main" onclick="searchBanks()" style="grid-column: span 2;">Search Blood Banks</button>
+        </div>
+        <div id="searchResults" class="grid-container"></div>
+    </div>
+
+    <div class="section" id="donor">
+        <div style="max-width: 500px; margin: 0 auto;">
+            <div class="form-group" style="grid-template-columns: 1fr;">
+                <input type="text" id="donorName" placeholder="Full Name">
+                <input type="text" id="donorGroup" placeholder="Blood Group (e.g., O+)">
+                <input type="text" id="donorCity" placeholder="City">
+                <input type="text" id="donorPhone" placeholder="Phone Number">
+                <button class="btn-main" onclick="registerDonor()">Register Now</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="section" id="info">
+        <div class="info-grid">
+            <div class="info-card">
+                <h3><i class="fas fa-apple-whole"></i> Before You Donate</h3>
+                <ul>
+                    <li>Eat a healthy, low-fat meal.</li>
+                    <li>Drink plenty of water (500ml+).</li>
+                    <li>Get 8 hours of sleep.</li>
+                    <li>Avoid alcohol 24 hours before.</li>
+                </ul>
+            </div>
+            <div class="info-card">
+                <h3><i class="fas fa-hospital-user"></i> Collection Protocol</h3>
+                <ul>
+                    <li>Present Doctor’s prescription.</li>
+                    <li>Provide Patient ID & Blood Report.</li>
+                    <li>Processing time: 30–60 mins.</li>
+                    <li>Replacement donor may be requested.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="process-timeline">
+            <h3><i class="fas fa-vial"></i> The Donation Journey</h3>
+            <div class="step"><b>1. Registration:</b> Fill out basic health and contact details.</div>
+            <div class="step"><b>2. Medical Check:</b> Quick check of Hb level, BP, and weight.</div>
+            <div class="step"><b>3. Donation:</b> The actual process takes only 8–10 minutes.</div>
+            <div class="step"><b>4. Refreshment:</b> Rest for 10 mins with a light snack and juice.</div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+function showToast(message, isError = false) {
+    const toast = document.getElementById("toast");
+
+    toast.innerText = message;
+    toast.className = "toast";
+
+    if (isError) {
+        toast.classList.add("error");
+    }
+
+    toast.style.display = "block";
+
+    setTimeout(() => {
+        toast.style.display = "none";
+    }, 3000);
+}
+
+    document.addEventListener("DOMContentLoaded", function() {
+    loadLiveAvailability();
+});
+
+    function switchTab(e, tabId) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        e.target.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+        if(tabId === 'availability') loadLiveAvailability();
+    }
+
+    async function searchBanks() {
+        const city = document.getElementById('searchCity').value;
+        const type = document.getElementById('searchType').value;
+        const results = document.getElementById('searchResults');
+        
+        try {
+            const response = await fetch(`/search_banks?city=${city}&type=${type}`);
+            const data = await response.json();
+            
+            if (data.length === 0) {
+                results.innerHTML = '<p style="padding: 20px;">No blood banks found for this search.</p>';
+                return;
+            }
+
+            results.innerHTML = data.map(bank => `
+                <div class="bank-card">
+                    <h3>${bank.name}</h3>
+                    <p><strong>Category:</strong> ${bank.category}</p>
+                    <p><i class="fas fa-map-marker-alt"></i> ${bank.address}, ${bank.city}</p>
+                    <p><i class="fas fa-phone"></i> ${bank.phone}</p>
+                </div>
+            `).join('');
+        } catch (err) {
+            showToast("Error searching blood banks.", true);
+        }
+    }
+
+    async function registerDonor() {
+    const payload = {
+        name: document.getElementById('donorName').value,
+        group: document.getElementById('donorGroup').value,
+        city: document.getElementById('donorCity').value,
+        phone: document.getElementById('donorPhone').value
+    };
+    
+    if(!payload.name || !payload.group) {
+        showToast("Please fill in required fields.", true);
+        return;
+    }
+
+    try {
+        const response = await fetch('/register_donor', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+        
+        if(response.ok) {
+            showToast("Donor Registered Successfully! ❤️");
+            document.querySelectorAll('#donor input').forEach(i => i.value = '');
+        } else {
+            showToast("Registration failed. Try again.", true);
+        }
+
+    } catch (error) {
+        showToast("Server error. Please try later.", true);
+    }
+}
+async function loadLiveAvailability() {
+    try {
+        const response = await fetch('/get_inventory');
+        const data = await response.json();
+        const container = document.getElementById('hospital-container');
+        container.innerHTML = '';
+
+        const grouped = {};
+        data.forEach(item => {
+            if (!grouped[item.hospital_name]) {
+                grouped[item.hospital_name] = [];
+            }
+            grouped[item.hospital_name].push(item);
+        });
+
+        Object.keys(grouped).forEach(hospital => {
+            const hospitalCard = document.createElement('div');
+            hospitalCard.className = 'bank-card';
+
+            // Create blood items HTML
+            const bloodItemsHTML = grouped[hospital].map(item => {
+                const statusClass = item.status.toLowerCase().replace(/\s+/g, '-');
+                return `
+                    <div class="blood-item">
+                        <span class="blood-group-label">${item.blood_group}</span>
+                        <span class="units-count">${item.units_available} Units</span>
+                        <span class="status-badge ${statusClass}">${item.status}</span>
+                    </div>
+                `;
+            }).join('');
+
+            hospitalCard.innerHTML = `
+                <h3 onclick="toggleHospital('${hospital.replace(/'/g, "\\'")}')" style="cursor:pointer">
+                    <i class="fas fa-hospital"></i> ${hospital}
+                    <i class="fas fa-chevron-down" style="margin-left:auto; font-size:0.8rem; color:#ccc"></i>
+                </h3>
+                <div id="details-${hospital.replace(/\s+/g, '-')}" style="display:none;">
+                    <div class="blood-grid">
+                        ${bloodItemsHTML}
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(hospitalCard);
+        });
+    } catch (err) {
+        console.error("Error loading availability:", err);
+    }
+}
+function toggleHospital(hospitalName) {
+    const id = "details-" + hospitalName.replace(/\s+/g, '-');
+    const div = document.getElementById(id);
+
+    div.style.display = div.style.display === "block" ? "none" : "block";
+}
+    
+</script>
+<!-- Toast Popup -->
+<div id="toast" class="toast"></div>
+</body>
+</html>

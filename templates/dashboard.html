@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MediHub | Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --sidebar-bg: #004D40; --main-bg: #F0F4F4; --accent: #00796B; }
+        * { margin:0; padding:0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        
+        /* Flex container to hold sidebar and content side-by-side */
+        body { display: flex; height: 100vh; overflow: hidden; background: var(--main-bg); }
+
+        .sidebar {
+            width: 260px; background: var(--sidebar-bg);
+            color: white; padding: 30px 20px;
+            display: flex; flex-direction: column;
+        }
+        .nav-item {
+            padding: 15px; display: flex; align-items: center; gap: 15px;
+            color: #B2DFDB; text-decoration: none; border-radius: 12px; margin-bottom: 5px;
+        }
+        .nav-item.active, .nav-item:hover { background: rgba(255,255,255,0.1); color: white; }
+
+        /* The viewport takes all remaining space */
+        .viewport { flex: 1; height: 100%; }
+        iframe { width: 100%; height: 100%; border: none; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Care-Bridge</h2>
+        <a href="/blood_bank" target="content_frame" class="nav-item"><i class="fas fa-droplet"></i> Blood Bank</a>
+        <a href="/vaccination" target="content_frame" class="nav-item"><i class="fas fa-syringe"></i> Vaccination</a>
+        <a href="/organ_donation" target="content_frame" class="nav-item"><i class="fas fa-hand-holding-heart"></i> Organ Donation</a>
+        <a href="/health_camps" target="content_frame" class="nav-item"><i class="fas fa-campground"></i> Health Camps</a>
+        <a href="/nearest_hospitals" target="content_frame" class="nav-item"><i class="fas fa-hospital"></i> Nearest Hospitals</a>
+        <a href="/appointment" target="content_frame" class="nav-item"><i class="fas fa-calendar-check"></i> Appointment</a>
+        <div style="margin-top: auto;">
+            <a href="/" class="nav-item" style="color: #FF8A80;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>
+
+    <div class="viewport">
+        <iframe name="content_frame" src="/blood_bank"></iframe>
+    </div>
+
+    <script>
+        // Highlighting active tabs
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Panel - Book Appointment</title>
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:"Segoe UI",sans-serif;
+}
+
+body{
+  background:#f4f7fb;
+}
+
+/* Main Content – full width now */
+.main{
+  padding:25px;
+  width:100%;
+}
+
+h1{
+  margin-bottom:20px;
+  color:#333;
+}
+
+.search-filter{
+  margin-bottom:15px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.search-filter input,
+.search-filter select{
+  padding:10px;
+  border-radius:5px;
+  border:1px solid #ccc;
+  flex:1;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  background:white;
+  border-radius:8px;
+  overflow:hidden;
+  margin-top:20px;
+}
+
+th,td{
+  padding:14px;
+  text-align:left;
+  border-bottom:1px solid #eee;
+}
+
+th{
+  background:#e9f1ff;
+}
+
+.btn{
+  padding:8px 12px;
+  background:#0d6efd;
+  color:white;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
+}
+
+.form-card{
+  position:relative;
+  background:white;
+  padding:20px 20px 40px;
+  border-radius:8px;
+  max-width:900px;
+  margin-top:20px;
+}
+
+.close-btn{
+  position:absolute;
+  top:15px;
+  right:15px;
+  background:#dc3545;
+  color:white;
+  border:none;
+  border-radius:50%;
+  width:30px;
+  height:30px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.form-group{
+  margin-bottom:15px;
+}
+
+label{
+  display:block;
+  margin-bottom:5px;
+  font-weight:500;
+}
+
+input,select{
+  width:100%;
+  padding:10px;
+  border:1px solid #ccc;
+  border-radius:5px;
+}
+
+.submit-btn{
+  margin-top:20px;
+  background:#198754;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #28a745;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  display: none;
+  z-index: 9999;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.toast.error {
+  background: #dc3545;
+}
+
+/* Confirm Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+}
+
+.modal-card {
+  background: white;
+  padding: 25px;
+  border-radius: 8px;
+  width: 350px;
+  text-align: center;
+}
+
+.modal-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.btn-cancel {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn-confirm {
+  background: #0d6efd;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.hidden{
+  display:none;
+}
+
+</style>
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<div id="confirmModal" class="modal-overlay hidden">
+    <div class="modal-card">
+        <h3>Confirm Booking</h3>
+        <p id="confirmMessage">Are you sure?</p>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeConfirmModal()">Cancel</button>
+            <button class="btn-confirm" id="confirmActionBtn">Yes</button>
+        </div>
+    </div>
+</div>
+<!-- Main Content -->
+<div class="main">
+<h1>Book Appointment</h1>
+
+<!-- Search & Filters -->
+<div class="search-filter">
+<input type="text" id="searchName" placeholder="Search Doctor Name">
+<input type="text" id="searchDept" placeholder="Search Department">
+<input type="text" id="searchHospital" placeholder="Search Hospital">
+<select id="filterDay">
+  <option value="">All Days</option>
+  <option value="Mon">Monday</option>
+  <option value="Tue">Tuesday</option>
+  <option value="Wed">Wednesday</option>
+  <option value="Thu">Thursday</option>
+  <option value="Fri">Friday</option>
+</select>
+</div>
+
+<!-- Doctors Table -->
+<div id="appointmentsTable">
+<table>
+<thead>
+<tr>
+<th>Hospital</th>
+<th>Doctor</th>
+<th>Department</th>
+<th>Available Slots</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="doctorsTbody">
+<!-- Rows will be populated dynamically -->
+</tbody>
+</table>
+</div>
+
+<!-- Booking Form -->
+<div id="bookingForm" class="form-card hidden">
+<button class="close-btn" id="closeBookingFormBtn">✖</button>
+<h3>Book Appointment</h3>
+<div class="form-group"><label>Hospital</label><input type="text" id="bookHospital" disabled></div>
+<div class="form-group"><label>Doctor</label><input type="text" id="bookDoctor" disabled></div>
+<div class="form-group"><label>Department</label><input type="text" id="bookDept" disabled></div>
+<div class="form-group"><label>Date</label><input type="date" id="bookDate"></div>
+<div class="form-group"><label>Time Slot</label><input type="time" id="bookTime"></div>
+<div class="form-group"><label>Patient Name</label><input type="text" id="bookName"></div>
+<div class="form-group"><label>Age</label><input type="number" id="bookAge"></div>
+<div class="form-group"><label>ID Proof</label><input type="text" id="bookId"></div>
+<button class="btn submit-btn" id="submitBookingForm">Book Appointment</button>
+</div>
+
+</div>
+
+<script>
+
+  function showToast(message, isError = false) {
+    const toast = document.getElementById("toast");
+    toast.innerText = message;
+    toast.className = "toast";
+
+    if (isError) {
+        toast.classList.add("error");
+    }
+
+    toast.style.display = "block";
+
+    setTimeout(() => {
+        toast.style.display = "none";
+    }, 3000);
+}
+
+function showConfirmModal(message, onConfirm) {
+    document.getElementById("confirmMessage").innerText = message;
+    const modal = document.getElementById("confirmModal");
+    const confirmBtn = document.getElementById("confirmActionBtn");
+
+    modal.classList.remove("hidden");
+
+    confirmBtn.onclick = function () {
+        modal.classList.add("hidden");
+        onConfirm();
+    };
+}
+
+function closeConfirmModal() {
+    document.getElementById("confirmModal").classList.add("hidden");
+}
+// Global State
+let currentDoc = null;
+let doctors = [];
+
+// DOM Elements
+const tbody = document.getElementById('doctorsTbody');
+const searchName = document.getElementById('searchName');
+const searchDept = document.getElementById('searchDept');
+const searchHospital = document.getElementById('searchHospital');
+const filterDay = document.getElementById('filterDay');
+const bookingForm = document.getElementById('bookingForm');
+
+// 1. Initial Data Fetch
+function fetchApprovedDoctors() {
+    fetch('/api/get_approved_doctors')
+        .then(res => res.json())
+        .then(data => {
+            doctors = data; 
+            renderTable();  
+        })
+        .catch(err => console.error("Error fetching doctors:", err));
+}
+
+window.onload = fetchApprovedDoctors;
+
+// 2. Helper: Convert "HH:mm" to total minutes for numerical comparison
+function timeToMinutes(timeStr) {
+    if (!timeStr) return 0;
+    // Handles formats like "10:00", "10:00:00", or "5:00"
+    const parts = timeStr.split(':');
+    const hours = parseInt(parts[0], 10);
+    const minutes = parseInt(parts[1], 10) || 0;
+    return hours * 60 + minutes;
+}
+
+// 3. Render Table with Event Listeners
+function renderTable() {
+    tbody.innerHTML = "";
+    const nameVal = searchName.value.toLowerCase();
+    const deptVal = searchDept.value.toLowerCase();
+    const hospVal = searchHospital.value.toLowerCase();
+    const dayVal = filterDay.value;
+
+    doctors.forEach(doc => {
+        const matchesName = doc.name.toLowerCase().includes(nameVal);
+        const matchesDept = doc.department.toLowerCase().includes(deptVal);
+        const matchesHosp = doc.hospital.toLowerCase().includes(hospVal);
+        const matchesDay = dayVal === "" || (doc.availability && doc.availability.some(a => a.day === dayVal));
+
+        if (matchesName && matchesDept && matchesHosp && matchesDay) {
+            const daysText = doc.availability.map(a => `${a.day} ${a.from}-${a.to}`).join(", ");
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${doc.hospital}</td>
+                <td>${doc.name}</td>
+                <td>${doc.department}</td>
+                <td>${daysText}</td>
+                <td><button class="btn bookBtn">Book</button></td>
+            `;
+            tbody.appendChild(row);
+
+            // Button click logic
+            // Inside your renderTable loop...
+            row.querySelector('.bookBtn').addEventListener('click', () => {
+                currentDoc = doc; // This now includes the .id we added to the backend
+                document.getElementById('bookHospital').value = doc.hospital;
+                document.getElementById('bookDoctor').value = doc.name;
+                document.getElementById('bookDept').value = doc.department;
+                document.getElementById('appointmentsTable').classList.add('hidden');
+                bookingForm.classList.remove('hidden');
+            });
+        }
+    });
+}
+
+// 4. Form Submission & Validation Logic
+document.getElementById('submitBookingForm').addEventListener('click', () => {
+    if (!currentDoc) return;
+
+    const dateInput = document.getElementById('bookDate').value;
+    const selectedTime = document.getElementById('bookTime').value;
+    
+    if (!dateInput || !selectedTime) {
+        showToast("Please select both a date and a time slot.", true);
+        return;
+    }
+
+    // Get the day of the week from the selected date (e.g., "Mon")
+    const selectedDate = new Date(dateInput);
+    const dayName = selectedDate.toLocaleDateString('en-US', { weekday: 'short' });
+
+    // Check if doctor works on that day
+    const avail = currentDoc.availability.find(a => a.day === dayName);
+
+    if (!avail) {
+        showToast(`Doctor is not available on ${dayName}`, true);
+        return;
+    }
+
+    // --- TIME VALIDATION LOGIC ---
+    const userMins = timeToMinutes(selectedTime);
+    const startMins = timeToMinutes(avail.from);
+    let endMins = timeToMinutes(avail.to);
+
+    // LOGIC: If end time (e.g. 05:00) is numerically less than start time (10:00), 
+    // it implies PM. We add 12 hours (720 mins) to the end time.
+    if (endMins < startMins) {
+        endMins += 12 * 60; 
+    }
+
+    // If user selects "02:00" (140 mins), we must check if they meant PM (140 + 720 = 860)
+    let finalUserMins = userMins;
+    if (finalUserMins < startMins && (finalUserMins + 720) <= endMins) {
+        finalUserMins += 720;
+    }
+
+    if (finalUserMins < startMins || finalUserMins > endMins) {
+        showToast(`Doctor is only available between ${avail.from} and ${avail.to}`, true);
+        return;
+    }
+
+    // 5. Submit to Backend
+    // ... inside the submitBookingForm click listener ...
+    showConfirmModal(
+    "Are you sure you want to book this appointment?",
+    function () {
+
+        fetch('/api/book_appointment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                doctor_id: currentDoc.id,
+                doctor_name: currentDoc.name,
+                hospital: currentDoc.hospital,
+                date: dateInput,
+                time: selectedTime,
+                patient_name: document.getElementById('bookName').value,
+                age: document.getElementById('bookAge').value,
+                id_proof: document.getElementById('bookId').value
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                showToast("Appointment Booked Successfully!");
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showToast("Error: " + data.message, true);
+            }
+        })
+        .catch(() => {
+            showToast("Something went wrong!", true);
+        });
+      
+
+    }
+);
+});
+  
+
+// Search & filter events
+[searchName, searchDept, searchHospital, filterDay].forEach(el => {
+    el.addEventListener('input', renderTable);
+});
+
+// Close form button
+document.getElementById('closeBookingFormBtn').addEventListener('click', () => {
+    bookingForm.classList.add('hidden');
+    document.getElementById('appointmentsTable').classList.remove('hidden');
+});
+</script>
+</body>
+</html>
