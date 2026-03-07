@@ -244,11 +244,11 @@ input,select{
 <div class="form-group"><label>Hospital</label><input type="text" id="bookHospital" disabled></div>
 <div class="form-group"><label>Doctor</label><input type="text" id="bookDoctor" disabled></div>
 <div class="form-group"><label>Department</label><input type="text" id="bookDept" disabled></div>
-<div class="form-group"><label>Date</label><input type="date" id="bookDate"></div>
-<div class="form-group"><label>Time Slot</label><input type="time" id="bookTime"></div>
-<div class="form-group"><label>Patient Name</label><input type="text" id="bookName"></div>
-<div class="form-group"><label>Age</label><input type="number" id="bookAge"></div>
-<div class="form-group"><label>ID Proof</label><input type="text" id="bookId"></div>
+<div class="form-group"><label>Date</label><input type="date" id="bookDate" required></div>
+<div class="form-group"><label>Time Slot</label><input type="time" id="bookTime" required></div>
+<div class="form-group"><label>Patient Name</label><input type="text" id="bookName" required minlength="3" maxlength="50"></div>
+<div class="form-group"><label>Age</label><input type="number" id="bookAge" min="0" max="120" required></div>
+<div class="form-group"><label>ID Proof</label><input type="text" id="bookId" required minlength="5"></div>
 <button class="btn submit-btn" id="submitBookingForm">Book Appointment</button>
 </div>
 
@@ -311,7 +311,11 @@ function fetchApprovedDoctors() {
         .catch(err => console.error("Error fetching doctors:", err));
 }
 
-window.onload = fetchApprovedDoctors;
+window.onload = function(){
+    fetchApprovedDoctors();
+    document.getElementById("bookDate").min =
+        new Date().toISOString().split("T")[0];
+};
 
 // 2. Helper: Convert "HH:mm" to total minutes for numerical comparison
 function timeToMinutes(timeStr) {
@@ -356,6 +360,11 @@ function renderTable() {
                 document.getElementById('bookHospital').value = doc.hospital;
                 document.getElementById('bookDoctor').value = doc.name;
                 document.getElementById('bookDept').value = doc.department;
+                document.getElementById('bookDate').value = "";
+                document.getElementById('bookTime').value = "";
+                document.getElementById('bookName').value = "";
+                document.getElementById('bookAge').value = "";
+                document.getElementById('bookId').value = "";
                 document.getElementById('appointmentsTable').classList.add('hidden');
                 bookingForm.classList.remove('hidden');
             });
@@ -369,6 +378,42 @@ document.getElementById('submitBookingForm').addEventListener('click', () => {
 
     const dateInput = document.getElementById('bookDate').value;
     const selectedTime = document.getElementById('bookTime').value;
+    const patientName = document.getElementById('bookName').value.trim();
+    const age = document.getElementById('bookAge').value;
+    const idProof = document.getElementById('bookId').value.trim();
+
+    // Patient name validation
+    if (patientName === "") {
+        showToast("Patient name is required", true);
+        return;
+    }
+
+    if (!/^[a-zA-Z\s]{3,50}$/.test(patientName)) {
+        showToast("Enter a valid patient name", true);
+        return;
+    }
+
+    // Age validation
+    if (age === "") {
+        showToast("Age is required", true);
+        return;
+    }
+
+    if (age < 0 || age > 120) {
+        showToast("Enter valid age between 0 and 120", true);
+        return;
+    }
+
+    // ID Proof validation
+    if (idProof === "") {
+        showToast("ID proof is required", true);
+        return;
+    }
+
+    if(idProof.length < 5){
+      showToast("Enter valid ID proof", true);
+      return;
+    }
     
     if (!dateInput || !selectedTime) {
         showToast("Please select both a date and a time slot.", true);
@@ -409,6 +454,10 @@ document.getElementById('submitBookingForm').addEventListener('click', () => {
         return;
     }
 
+
+
+    const submitBtn = document.getElementById("submitBookingForm");
+    submitBtn.disabled = true;
     // 5. Submit to Backend
     // ... inside the submitBookingForm click listener ...
     showConfirmModal(
@@ -436,10 +485,12 @@ document.getElementById('submitBookingForm').addEventListener('click', () => {
                 setTimeout(() => location.reload(), 1500);
             } else {
                 showToast("Error: " + data.message, true);
+                submitBtn.disabled = false;
             }
         })
         .catch(() => {
             showToast("Something went wrong!", true);
+            submitBtn.disabled = false;
         });
       
 

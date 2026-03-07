@@ -200,17 +200,17 @@
     </style>
 </head>
 <body>
-    <div id="toast-container"></div>
+<div id="toast-container"></div>
     <div id="confirmModal" class="modal-overlay hidden">
-    <div class="modal-card">
-        <h3>Confirm Action</h3>
-        <p id="confirmMessage">Are you sure?</p>
-        <div class="modal-actions">
-            <button class="btn-cancel" onclick="closeConfirmModal()">Cancel</button>
-            <button class="btn-confirm" id="confirmActionBtn">Yes</button>
+        <div class="modal-card">
+            <h3>Confirm Action</h3>
+            <p id="confirmMessage">Are you sure?</p>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeConfirmModal()">Cancel</button>
+                <button class="btn-confirm" id="confirmActionBtn">Yes</button>
+            </div>
         </div>
     </div>
-</div>
     <div class="sidebar">
         <div class="sidebar-header">
             <h3>HOSPITAL HUB</h3>
@@ -279,53 +279,25 @@
                 <h3>Blood Bank Inventory (Units Available)</h3>
 
                 <div class="grid" style="margin-top: 20px;">
-                    <div class="resource-row">
-                        <strong>A+</strong>
-                        <input type="number" id="A_pos" value="0">
-                    </div>
-                    <div class="resource-row">
-                        <strong>A-</strong>
-                        <input type="number" id="A_neg" value="0">
-                    </div>
-                    <div class="resource-row">
-                        <strong>B+</strong>
-                        <input type="number" id="B_pos" value="0">
-                    </div>
-                    <div class="resource-row">
-                        <strong>B-</strong>
-                        <input type="number" id="B_neg" value="0">
-                    </div>
-                    <div class="resource-row">
-                        <strong>O+</strong>
-                        <input type="number" id="O_pos" value="0">
-                    </div>
-                    <div class="resource-row">
-                        <strong>O-</strong>
-                        <input type="number" id="O_neg" value="0">
-                    </div>
-                    <div class="resource-row">
-                        <strong>AB+</strong>
-                        <input type="number" id="AB_pos" value="0">
-                    </div>
-                    <div class="resource-row">
-                        <strong>AB-</strong>
-                        <input type="number" id="AB_neg" value="0">
-                    </div>
-                    </div>
-
-                    <button
-                        id="pushStockBtn"
-                        type="button"
-                        class="update-btn"
-                        style="background: var(--success); position: relative; z-index: 10;"
-                    >
-                        Push Live Stock to User Dashboard
-                    </button>
-
-
-
+                    <div class="resource-row"><strong>A+</strong><input type="number" id="A_pos" value="0"></div>
+                    <div class="resource-row"><strong>A-</strong><input type="number" id="A_neg" value="0"></div>
+                    <div class="resource-row"><strong>B+</strong><input type="number" id="B_pos" value="0"></div>
+                    <div class="resource-row"><strong>B-</strong><input type="number" id="B_neg" value="0"></div>
+                    <div class="resource-row"><strong>O+</strong><input type="number" id="O_pos" value="0"></div>
+                    <div class="resource-row"><strong>O-</strong><input type="number" id="O_neg" value="0"></div>
+                    <div class="resource-row"><strong>AB+</strong><input type="number" id="AB_pos" value="0"></div>
+                    <div class="resource-row"><strong>AB-</strong><input type="number" id="AB_neg" value="0"></div>
                 </div>
+
+                <button
+                    id="pushStockBtn"
+                    type="button"
+                    class="update-btn"
+                    style="background: var(--success); position: relative; z-index: 10;">
+                    Push Live Stock to User Dashboard
+                </button>
             </div>
+        </div>
 
 
 
@@ -434,62 +406,63 @@
             </div>
 
             <div id="vaccination" class="section">
-    <div class="header-flex">
-        <h3>My Vaccination Centers</h3>
-        <button class="update-btn" id="addCenterBtn" style="width:auto;" onclick="openCenterModal()">➕ Add Center</button>
-    </div>
-    <div id="centersTable" class="card">
-        <table>
-            <thead>
-                <tr>
-                    <th>Center Name</th>
-                    <th>Address</th>
-                    <th>Vaccine Types</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody id="vaccineTableBody"></tbody>
-        </table>
-    </div>
-</div>
-
-<div id="centerModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; justify-content:center; align-items:center;">
-    <div style="background:white; width:450px; padding:30px; border-radius:15px; position:relative; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-        
-        <span onclick="closeCenterModal()" style="position:absolute; right:20px; top:15px; cursor:pointer; font-size:28px; color:#666;">&times;</span>
-        
-        <h3 style="margin-top:0; color:var(--hosp-primary); border-bottom: 2px solid #f0f4f8; padding-bottom: 10px;">Register Vaccination Center</h3>
-        
-        <div style="margin-top:20px;">
-            <label style="display:block; font-weight:600; font-size:13px; margin-bottom:5px;">Center Name</label>
-            <input type="text" id="v_center_name" placeholder="Hospital Wing Name" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; margin-bottom:15px;">
-
-            <div style="display:flex; gap:10px;">
-                <div style="flex:1;">
-                    <label style="display:block; font-weight:600; font-size:13px; margin-bottom:5px;">Vaccine Type</label>
-                    <select id="v_vaccine_type" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; margin-bottom:15px;">
-                        <option value="Covaxin">Covaxin</option>
-                        <option value="Covishield">Covishield</option>
-                    </select>
+                <div class="header-flex">
+                    <h3>My Vaccination Centers</h3>
+                    <button class="update-btn" id="addCenterBtn" style="width:auto;" onclick="openCenterModal()">➕ Add Center</button>
                 </div>
-                <div style="flex:1;">
-                    <label style="display:block; font-weight:600; font-size:13px; margin-bottom:5px;">Total Slots</label>
-                    <input type="number" id="v_slots" placeholder="100" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; margin-bottom:15px;">
+                <div id="centersTable" class="card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Center Name</th>
+                                <th>Address</th>
+                                <th>Vaccine Types</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vaccineTableBody"></tbody>
+                    </table>
                 </div>
             </div>
 
-            <label style="display:block; font-weight:600; font-size:13px; margin-bottom:5px;">City</label>
-            <input type="text" id="v_city" placeholder="City Name" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; margin-bottom:15px;">
+            <div id="centerModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; justify-content:center; align-items:center;">
+                <div style="background:white; width:450px; padding:30px; border-radius:15px; position:relative; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+                    
+                    <span onclick="closeCenterModal()" style="position:absolute; right:20px; top:15px; cursor:pointer; font-size:28px; color:#666;">&times;</span>
+                    
+                    <h3 style="margin-top:0; color:var(--hosp-primary); border-bottom: 2px solid #f0f4f8; padding-bottom: 10px;">Register Vaccination Center</h3>
+                    
+                    <div style="margin-top:20px;">
+                        <label style="display:block; font-weight:600; font-size:13px; margin-bottom:5px;">Center Name</label>
+                        <input type="text" id="v_center_name" placeholder="Hospital Wing Name" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; margin-bottom:15px;">
 
-            <label style="display:block; font-weight:600; font-size:13px; margin-bottom:5px;">Full Address</label>
-            <textarea id="v_address" placeholder="Complete location details..." style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; height:80px; margin-bottom:15px;"></textarea>
+                        <div style="display:flex; gap:10px;">
+                            <div style="flex:1;">
+                                <label style="display:block; font-weight:600; font-size:13px; margin-bottom:5px;">Vaccine Type</label>
+                                <select id="v_vaccine_type" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; margin-bottom:15px;">
+                                    <option value="Covaxin">Covaxin</option>
+                                    <option value="Covishield">Covishield</option>
+                                </select>
+                            </div>
+                            <div style="flex:1;">
+                                <label style="display:block; font-weight:600; font-size:13px; margin-bottom:5px;">Total Slots</label>
+                                <input type="number" id="v_slots" placeholder="100" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; margin-bottom:15px;">
+                            </div>
+                        </div>
 
-            <button type="button" id="submitCenterBtn" style="width:100%; background:var(--hosp-primary); color:white; border:none; padding:12px; border-radius:5px; font-weight:bold; cursor:pointer;">
-                Submit for Approval
-            </button>
-        </div>
-    </div>
-</div>
+                        <label style="display:block; font-weight:600; font-size:13px; margin-bottom:5px;">City</label>
+                        <input type="text" id="v_city" placeholder="City Name" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; margin-bottom:15px;">
+
+                        <label style="display:block; font-weight:600; font-size:13px; margin-bottom:5px;">Full Address</label>
+                        <textarea id="v_address" placeholder="Complete location details..." style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; height:80px; margin-bottom:15px;"></textarea>
+
+                        <button type="button" id="submitCenterBtn" style="width:100%; background:var(--hosp-primary); color:white; border:none; padding:12px; border-radius:5px; font-weight:bold; cursor:pointer;">
+                            Submit for Approval
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div id="vaccination-attendees" class="section">
                 <div class="card">
                     <div class="header-flex">
@@ -521,62 +494,62 @@
             </div>
 
             <div id="camps" class="section">
-            <div class="card">
-                <div class="header-flex">
-                    <h3>Managed Campaigns</h3>
-                    <button class="update-btn" style="width:auto;" onclick="openCampModal()">+ Add New Camp</button>
-                </div>
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Camp Name</th>
-                        <th>Type</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                    </tr>
-                    </thead>
-
-                    <tbody id="myCampsTableBody"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="attendees" class="section">
-            <div class="card">
-                <div class="header-flex">
-                    <h3>Patient Registry</h3>
-                    <div style="display: flex; gap: 10px;">
-                        <select id="campFilter" onchange="loadAttendees()">
-                            <option value="all">All Campaigns</option>
-                        </select>
-                        <button class="update-btn" onclick="window.location.href='/hospital/download_attendees_csv'">
-                            <i class="fas fa-download"></i> Download CSV
-                        </button>
+                <div class="card">
+                    <div class="header-flex">
+                        <h3>Managed Campaigns</h3>
+                        <button class="update-btn" style="width:auto;" onclick="openCampModal()">+ Add New Camp</button>
                     </div>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Camp Name</th>
+                            <th>Type</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                        </thead>
+
+                        <tbody id="myCampsTableBody"></tbody>
+                    </table>
                 </div>
-                <table>
-                    <thead><tr><th>Patient Name</th><th>Camp Linked</th><th>Phone</th><th>Email</th><th>Date</th></tr></thead>
-                    <tbody id="attendeesTableBody"></tbody>
-                </table>
+            </div>
+
+            <div id="attendees" class="section">
+                <div class="card">
+                    <div class="header-flex">
+                        <h3>Patient Registry</h3>
+                        <div style="display: flex; gap: 10px;">
+                            <select id="campFilter" onchange="loadAttendees()">
+                                <option value="all">All Campaigns</option>
+                            </select>
+                            <button class="update-btn" onclick="window.location.href='/hospital/download_attendees_csv'">
+                                <i class="fas fa-download"></i> Download CSV
+                            </button>
+                        </div>
+                    </div>
+                    <table>
+                        <thead><tr><th>Patient Name</th><th>Camp Linked</th><th>Phone</th><th>Email</th><th>Date</th></tr></thead>
+                        <tbody id="attendeesTableBody"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="modal" id="campModal">
-        <div class="modal-content">
-            <span class="close-icon" onclick="closeCampModal()">✕</span>
-            <h3>Add Health Camp</h3>
-            <input type="text" id="campName" placeholder="Camp Name">
-            <select id="campType">
-                <option value="General">General Health Camp</option>
-                <option value="Eye">Eye Camp</option>
-            </select>
-            <input type="datetime-local" id="campDate">
-            <input type="text" id="campAddress" placeholder="Address">
-            <input type="file" id="campImage">
-            <button class="update-btn" style="width:100%" onclick="submitCamp()">Submit for Approval</button>
+        <div class="modal" id="campModal">
+            <div class="modal-content">
+                <span class="close-icon" onclick="closeCampModal()">✕</span>
+                <h3>Add Health Camp</h3>
+                <input type="text" id="campName" placeholder="Camp Name">
+                <select id="campType">
+                    <option value="General">General Health Camp</option>
+                    <option value="Eye">Eye Camp</option>
+                </select>
+                <input type="datetime-local" id="campDate">
+                <input type="text" id="campAddress" placeholder="Address">
+                <input type="file" id="campImage">
+                <button class="update-btn" style="width:100%" onclick="submitCamp()">Submit for Approval</button>
+            </div>
         </div>
-    </div>
     <script>
         function showToast(message, isError = false) {
             const container = document.getElementById("toast-container");
@@ -713,6 +686,55 @@ console.log("Hospital ID:", HOSPITAL_ID);
         return;
     }
 
+    if (!name.trim()) {
+        showToast("Camp name required", true);
+        return;
+    }
+
+    if (!date) {
+        showToast("Camp date required", true);
+        return;
+    }
+
+    const selectedDate = new Date(date);
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    selectedDate.setHours(0,0,0,0);
+
+    if (selectedDate < today) {
+        showToast("Camp date cannot be in the past", true);
+        return;
+    }
+
+    if (!address.trim()) {
+        showToast("Camp address required", true);
+        return;
+    }
+
+    if (address.length < 10) {
+        showToast("Please enter complete address", true);
+        return;
+    }
+
+    if (address.length > 200) {
+        showToast("Address too long", true);
+        return;
+    }
+
+    if (imageFile) {
+        const allowed = ["image/jpeg","image/png","image/jpg"];
+
+        if (!allowed.includes(imageFile.type)) {
+            showToast("Only JPG or PNG images allowed", true);
+            return;
+        }
+
+        if (imageFile.size > 2 * 1024 * 1024) {
+            showToast("Image must be under 2MB", true);
+            return;
+        }
+    }
+
     // 3. Prepare FormData (Crucial for images)
     const formData = new FormData();
     formData.append('name', name);
@@ -840,6 +862,55 @@ submitDoctorForm.addEventListener('click', () => {
 
     if (!doctor_name || !department || days.length === 0) {
         showToast('Please fill all required fields', true);
+        return;
+    }
+
+    if (!doctor_name.trim()) {
+        showToast("Doctor name is required", true);
+        return;
+    }
+
+    if (!department.trim()) {
+        showToast("Department is required", true);
+        return;
+    }
+
+    if (days.length === 0) {
+        showToast("Select at least one available day", true);
+        return;
+    }
+
+    if (!from_time || !to_time) {
+        showToast("Please select consultation time", true);
+        return;
+    }
+
+    if (from_time >= to_time) {
+        showToast("From time must be earlier than To time", true);
+        return;
+    }
+
+    if (!max_patients || max_patients <= 0) {
+        showToast("Enter valid max patients", true);
+        return;
+    }
+
+    if (max_patients > 200) {
+        showToast("Max patients cannot exceed 200", true);
+        return;
+    }
+
+    const nameRegex = /^[A-Za-z\s]+$/;
+
+    if (!nameRegex.test(doctor_name)) {
+        showToast("Doctor name should contain only letters", true);
+        return;
+    }
+
+    const deptRegex = /^[A-Za-z\s]+$/;
+
+    if (!deptRegex.test(department)) {
+        showToast("Department should contain only letters", true);
         return;
     }
 
@@ -992,6 +1063,55 @@ async function submitVaccineCenter() {
         showToast("Please fill all fields!", true);
         return;
     }
+
+    if (!data.name.trim()) {
+        showToast("Center name is required", true);
+        return;
+    }
+
+    if (!data.city.trim()) {
+        showToast("City is required", true);
+        return;
+    }
+
+    if (data.address.length < 10) {
+        showToast("Please enter full address", true);
+        return;
+    }
+
+    if (data.address.length > 200) {
+        showToast("Address too long (max 200 characters)", true);
+        return;
+    }
+
+    if (!data.address.trim()) {
+        showToast("Address is required", true);
+        return;
+    }
+
+    if (!data.slots || data.slots <= 0) {
+        showToast("Slots must be greater than 0", true);
+        return;
+    }
+
+    if (data.slots > 1000) {
+        showToast("Slots cannot exceed 1000", true);
+        return;
+    }
+
+    if (!Number.isInteger(Number(data.slots))) {
+        showToast("Slots must be a number", true);
+        return;
+    }
+
+    const cityRegex = /^[A-Za-z\s]+$/;
+
+    if (!cityRegex.test(data.city)) {
+        showToast("City name should contain only letters", true);
+        return;
+    }
+
+   
 
     try {
         const response = await fetch('/hospital/add_vaccine_center', {
@@ -1155,6 +1275,16 @@ bloodGroups.forEach(bg => {
         units: parseInt(input.value || 0)
     });
 });
+
+if (stock.some(s => isNaN(s.units) || s.units < 0)) {
+    showToast("Blood units cannot be negative", true);
+    return;
+}
+
+if (stock.some(s => s.units > 500)) {
+    showToast("Blood units too large", true);
+    return;
+}
 
 
     try {

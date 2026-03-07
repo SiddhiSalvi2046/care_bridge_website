@@ -492,7 +492,12 @@ def health_camps():
         cursor = conn.cursor(dictionary=True)
         
         # We only want camps approved by the Admin
-        query = "SELECT * FROM health_camps WHERE status = 'Approved' ORDER BY camp_date ASC"
+        query = """
+        SELECT * FROM health_camps
+        WHERE status = 'Approved'
+        AND camp_date >= CURDATE()
+        ORDER BY camp_date ASC
+        """
         cursor.execute(query)
         camps = cursor.fetchall()
         
@@ -569,7 +574,12 @@ def handle_camp(camp_id):
 def health_camps_page():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM health_camps WHERE status = 'Approved'")
+    cursor.execute("""
+        SELECT * FROM health_camps
+        WHERE status='Approved'
+        AND camp_date >= CURDATE()
+        ORDER BY camp_date ASC
+    """)
     camps = cursor.fetchall()
     return render_template('health_camp.html', camps=camps)
 
@@ -641,6 +651,7 @@ def download_attendees_csv():
         JOIN health_camps c ON r.camp_id = c.id
         WHERE c.hospital_id = %s
     """, (hosp_id,))
+    
     rows = cursor.fetchall()
 
     def generate():

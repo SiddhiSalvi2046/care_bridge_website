@@ -187,13 +187,13 @@
                 </div>
                 <div class="form-group">
                     <label>Mobile Number</label>
-                    <input type="tel" id="userContact" placeholder="10-digit number" required>
+                    <input type="tel" id="userContact" placeholder="10-digit number" maxlength="10" required>
                 </div>
             </div>
 
             <div class="form-group">
                 <label>Selected Center</label>
-                <input type="text" id="preferredLocation" placeholder="Select a center from 'Find Centers' or type here" required>
+                <input type="text" id="preferredLocation" readonly placeholder="Select a center from 'Find Centers' or type here" required>
             </div>
 
             <div class="form-group">
@@ -298,24 +298,57 @@ function selectCenter(id, name, type) {
 document.getElementById('preRegForm').onsubmit = async (e) => {
     e.preventDefault();
 
+    const name = document.getElementById('userName').value.trim();
+    const nameRegex = /^[A-Za-z\s]{3,50}$/;
+
+    if(!nameRegex.test(name)){
+        showPopup("Invalid Name ❌","Name should contain only letters and spaces.");
+        return;
+    }
+
+    const phone = document.getElementById('userContact').value.trim();
+
+    if(!/^[6-9]\d{9}$/.test(phone)){
+        showPopup("Invalid Number ❌","Phone number must be 10 digits.");
+        return;
+    }
+
     const payload = {
     center_id: document.getElementById('selectedCenterId').value,
-    name: document.getElementById('userName').value,
-    phone: document.getElementById('userContact').value,
+    name: name,
+    phone: phone,
     type: document.getElementById('preRegForm').dataset.vaccineType,
     date: document.getElementById('preferredDate').value
 };
 
-if (!payload.center_id) {
+    if (!payload.center_id) {
         showPopup("Warning ⚠️", "Please select a vaccination center first.");
         return;
     }
 
-    if (!payload.phone.match(/^\d{10}$/)) {
-        showPopup("Invalid Number ❌", "Please enter a valid 10-digit mobile number.");
+
+    if(!payload.date){
+        showPopup("Missing Date ⚠️","Please select an appointment date.");
         return;
     }
 
+    const selectedDate = new Date(payload.date);
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    if(selectedDate < today){
+        showPopup("Invalid Date ❌","Please select a future date.");
+        return;
+    }
+
+    const ageGroup = document.getElementById('userAge').value;
+
+    if(!ageGroup){
+        showPopup("Missing Age Group ⚠️","Please select your age group.");
+        return;
+    }
+
+    
 
     const res = await fetch('/api/book_vaccination', {
         method: 'POST',
@@ -326,6 +359,8 @@ if (!payload.center_id) {
     if (res.ok) {
     showPopup("Success 🎉", "Appointment booked successfully!");
     e.target.reset();
+    document.getElementById("selectedCenterId").value = "";
+    document.getElementById("preferredLocation").value = "";
 } else {
     showPopup("Error ❌", "Booking failed. Please try again.");
 }
@@ -355,6 +390,20 @@ async function loadVaccinationHistory() {
         `;
     });
 }
+
+document.addEventListener("DOMContentLoaded", function(){
+
+const today = new Date();
+const maxDate = new Date();
+maxDate.setMonth(maxDate.getMonth()+2);
+
+document.getElementById("preferredDate").min =
+    today.toISOString().split("T")[0];
+
+document.getElementById("preferredDate").max =
+    maxDate.toISOString().split("T")[0];
+
+});
 
 </script>
 <!-- Popup Modal -->

@@ -236,9 +236,19 @@
         <div style="max-width: 500px; margin: 0 auto;">
             <div class="form-group" style="grid-template-columns: 1fr;">
                 <input type="text" id="donorName" placeholder="Full Name">
-                <input type="text" id="donorGroup" placeholder="Blood Group (e.g., O+)">
+                <select id="donorGroup">
+                <option value="">Select Blood Group</option>
+                <option>A+</option>
+                <option>A-</option>
+                <option>B+</option>
+                <option>B-</option>
+                <option>O+</option>
+                <option>O-</option>
+                <option>AB+</option>
+                <option>AB-</option>
+                </select>
                 <input type="text" id="donorCity" placeholder="City">
-                <input type="text" id="donorPhone" placeholder="Phone Number">
+                <input type="text" id="donorPhone" placeholder="Phone Number" pattern="[0-9]{10}">
                 <button class="btn-main" onclick="registerDonor()">Register Now</button>
             </div>
         </div>
@@ -307,9 +317,23 @@ function showToast(message, isError = false) {
         if(tabId === 'availability') loadLiveAvailability();
     }
 
+    
+
     async function searchBanks() {
-        const city = document.getElementById('searchCity').value;
+        const city = document.getElementById('searchCity').value.trim();
         const type = document.getElementById('searchType').value;
+
+        const nameRegex = /^[A-Za-z\s]+$/;
+
+        if (!city) {
+            showToast("Please enter a city name.", true);
+            return;
+        }
+
+        if (!nameRegex.test(city)) {
+            showToast("City name should contain only letters.", true);
+            return;
+        }
         const results = document.getElementById('searchResults');
         
         try {
@@ -336,14 +360,38 @@ function showToast(message, isError = false) {
 
     async function registerDonor() {
     const payload = {
-        name: document.getElementById('donorName').value,
-        group: document.getElementById('donorGroup').value,
-        city: document.getElementById('donorCity').value,
-        phone: document.getElementById('donorPhone').value
+        name: document.getElementById('donorName').value.trim(),
+        group: document.getElementById('donorGroup').value.trim(),
+        city: document.getElementById('donorCity').value.trim(),
+        phone: document.getElementById('donorPhone').value.trim()
     };
     
-    if(!payload.name || !payload.group) {
-        showToast("Please fill in required fields.", true);
+    const nameRegex = /^[A-Za-z\s]+$/;
+    const phoneRegex = /^[0-9]{10}$/;
+    const bloodRegex = /^(A|B|AB|O)[+-]$/;
+
+    if(!payload.name || !payload.group || !payload.city || !payload.phone){
+        showToast("Please fill all fields.", true);
+        return;
+    }
+
+    if(!nameRegex.test(payload.name)){
+        showToast("Name should contain only letters.", true);
+        return;
+    }
+
+    if(!nameRegex.test(payload.city)){
+        showToast("City should contain only letters.", true);
+        return;
+    }
+
+    if(!bloodRegex.test(payload.group.toUpperCase())){
+        showToast("Enter valid blood group (A+, B+, O+, AB- etc).", true);
+        return;
+    }
+
+    if(!phoneRegex.test(payload.phone)){
+        showToast("Phone number must be 10 digits.", true);
         return;
     }
 

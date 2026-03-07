@@ -102,7 +102,7 @@
         <div class="form-row">
             <div><label>Email <span>*</span></label><input type="email" id="email" required></div>
             <div><label>DOB (DD/MM/YYYY) <span>*</span></label><input type="date" id="dob" required></div>
-            <div><label>Age <span>*</span></label><input type="number" id="age" min="18" required></div>
+            <div><label>Age <span>*</span></label><input type="number" id="age" min="18" required readonly></div>
         </div>
         <div class="form-row">
             <div><label>Gender <span>*</span></label>
@@ -205,13 +205,108 @@
     }
 
    
-    document.getElementById('pledgeForm').addEventListener('submit', async function (e) {
+    document.getElementById('pledgeForm').addEventListener('submit', function (e) {
         e.preventDefault();
+        document.getElementById("confirmModal").style.display = "flex";
+    });
 
+    async function actualSubmit(){
         // Collect selected organs
         let organs = [];
         document.querySelectorAll('input[name="organ"]:checked')
             .forEach(o => organs.push(o.value));
+        
+        if (organs.length === 0) {
+            showToast("Please select at least one organ to donate.", true);
+            return;
+        }
+
+        const nameRegex = /^[A-Za-z\s]+$/;
+
+        const fname = document.getElementById('fname').value.trim();
+        const mname = document.getElementById('mname').value.trim();
+        const lname = document.getElementById('lname').value.trim();
+        const city = document.getElementById('city').value.trim();
+        const district = document.getElementById('district').value.trim();
+        const state = document.getElementById('state').value.trim();
+        const pin = document.getElementById('pin').value.trim();
+        
+
+        if (!nameRegex.test(fname) || !nameRegex.test(lname) || (mname && !nameRegex.test(mname))) {
+            showToast("Name should contain only letters.", true);
+            return;
+        }
+
+        // validation for same dateofbirth and age
+        const dob = new Date(document.getElementById('dob').value);
+        const age = parseInt(document.getElementById('age').value);
+
+        const today = new Date();
+        let calculatedAge = today.getFullYear() - dob.getFullYear();
+        const m = today.getMonth() - dob.getMonth();
+
+        if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+            calculatedAge--;
+        }
+
+        if (age !== calculatedAge) {
+            showToast("Age does not match Date of Birth.", true);
+            return;
+        }
+
+        if (calculatedAge < 18) {
+            showToast("You must be at least 18 years old to pledge organ donation.", true);
+            return;
+        }
+
+        if (dob > today) {
+            showToast("Date of birth cannot be in the future.", true);
+            return;
+        }
+
+        //its validation on id proof
+        const idType = document.getElementById('idType').value;
+        const idNum = document.getElementById('idNum').value.trim();
+
+        if (idType === "Aadhar Card" && !/^\d{12}$/.test(idNum)) {
+            showToast("Aadhar number must be 12 digits.", true);
+            return;
+        }
+
+        if (idType === "Voter ID" && !/^[A-Z]{3}[0-9]{7}$/.test(idNum)) {
+            showToast("Invalid Voter ID format.", true);
+            return;
+        }
+
+        if (idType === "Passport" && !/^[A-Z][0-9]{7}$/.test(idNum)) {
+            showToast("Invalid Passport format.", true);
+            return;
+        }
+
+        const mobile = document.getElementById('mobile').value;
+        const emobile = document.getElementById('emobile').value;
+
+        if (mobile === emobile) {
+            showToast("Emergency contact number cannot be same as your number.", true);
+            return;
+        }
+
+        const occupation = document.getElementById('occupation').value.trim();
+
+        if (!nameRegex.test(occupation)) {
+            showToast("Occupation should contain only letters.", true);
+            return;
+        }
+
+        if (!nameRegex.test(city) || !nameRegex.test(district) || !nameRegex.test(state)) {
+            showToast("City, District and State should contain only letters.", true);
+            return;
+        }
+
+        if(!/^[0-9]{6}$/.test(pin)){
+            showToast("PIN code must be 6 digits.", true);
+            return;
+        }
 
         // Prepare payload for backend
         const payload = {
@@ -228,6 +323,9 @@
             organs: organs
         };
 
+        const submitBtn = document.querySelector("#pledgeForm button");
+        submitBtn.disabled = true;
+
         try {
             const response = await fetch('/submit_pledge', {
                 method: 'POST',
@@ -239,6 +337,7 @@
 
             if (!response.ok) {
                 showToast(result.error || "Something went wrong", true);
+                submitBtn.disabled = false;
                 return;
             }
 
@@ -257,8 +356,11 @@
         } catch (err) {
             console.error(err);
             showToast("Server error. Please try again later.",true);
+            submitBtn.disabled = false;
         }
-    });
+
+    }
+   
 
 
     function generateCard() {
@@ -296,6 +398,28 @@ document.addEventListener("DOMContentLoaded", function () {
     checkExistingDonor();
 });
 
+function confirmSubmit(){
+    document.getElementById("confirmModal").style.display="none";
+    actualSubmit();
+}
+
+function closeConfirm(){
+    document.getElementById("confirmModal").style.display="none";
+}
+
+document.getElementById("dob").addEventListener("change", function(){
+    const dob = new Date(this.value);
+    const today = new Date();
+
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+        age--;
+    }
+
+    document.getElementById("age").value = age;
+});
 
 
 </script>
